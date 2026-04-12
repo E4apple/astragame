@@ -617,7 +617,7 @@ export default function AstraSTS() {
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #root { height: 100%; height: 100dvh; overflow: hidden; }
-    body { overflow: hidden; }
+    body { overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #b4530955; border-radius: 2px; }
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
@@ -962,7 +962,8 @@ export default function AstraSTS() {
       <div style={overlay}/>
 
       {/* TOP BAR */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 16px",
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 16px 8px",
+        paddingTop:"max(10px, env(safe-area-inset-top, 10px))",
         background:"rgba(0,0,0,.5)", borderBottom:"1px solid rgba(245,158,11,.15)", position:"relative", zIndex:2, flexShrink:0 }}>
         <span style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, color:"#f59e0b" }}>🔱 Floor {floor}</span>
         <span style={{ fontSize:12, color:"#6b5e50" }}>Turn {turn}</span>
@@ -1019,17 +1020,23 @@ export default function AstraSTS() {
 
       </div>
 
-      {/* BATTLE LOG — last 2 lines only, no scroll */}
-      <div style={{ flexShrink:0, padding:"4px 16px 2px", background:"rgba(0,0,0,.3)", borderTop:"1px solid rgba(255,255,255,.05)", borderBottom:"1px solid rgba(255,255,255,.05)" }}>
-        {battleLog.slice(-2).map((msg, i, arr) => (
-          <div key={i} style={{
-            fontSize: i === arr.length - 1 ? 13 : 11,
-            color:     i === arr.length - 1 ? "#f5e6c8" : "#6b5e50",
-            fontWeight:i === arr.length - 1 ? 600 : 400,
-            padding:"2px 0",
-            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
-          }}>{msg}</div>
-        ))}
+      {/* BATTLE LOG — last 4 lines, no scroll, newest brightest */}
+      <div style={{ flexShrink:0, padding:"4px 16px 4px", background:"rgba(0,0,0,.35)", borderTop:"1px solid rgba(255,255,255,.06)", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
+        {battleLog.slice(-4).map((msg, i, arr) => {
+          const isLatest = i === arr.length - 1;
+          const age = arr.length - 1 - i; // 0=newest
+          const colors = ["#f5e6c8","#a89070","#6b5e50","#4a4040"];
+          const sizes  = [13, 12, 11, 11];
+          return (
+            <div key={i} style={{
+              fontSize: sizes[age] || 11,
+              color:    colors[age] || "#3a3030",
+              fontWeight: isLatest ? 600 : 400,
+              padding:"1px 0",
+              whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+            }}>{msg}</div>
+          );
+        })}
       </div>
 
       {/* PLAYER SECTION */}
@@ -1128,7 +1135,7 @@ export default function AstraSTS() {
         </div>
 
         {/* End Turn */}
-        <div style={{ padding:"8px 16px 12px", display:"flex", justifyContent:"center" }}>
+        <div style={{ padding:"6px 16px", paddingBottom:"max(14px, env(safe-area-inset-bottom, 14px))", display:"flex", justifyContent:"center" }}>
           <button onClick={endTurn} disabled={enemyActing} style={{
             padding:"10px 32px", fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:4,
             background: enemyActing ? "rgba(80,80,80,.3)" : "linear-gradient(135deg,#92400e,#b45309)",
