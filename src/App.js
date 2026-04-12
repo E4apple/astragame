@@ -962,8 +962,8 @@ export default function AstraSTS() {
       <div style={overlay}/>
 
       {/* TOP BAR */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 16px 8px",
-        paddingTop:"max(10px, env(safe-area-inset-top, 10px))",
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 16px 6px",
+        paddingTop:"env(safe-area-inset-top, 6px)",
         background:"rgba(0,0,0,.5)", borderBottom:"1px solid rgba(245,158,11,.15)", position:"relative", zIndex:2, flexShrink:0 }}>
         <span style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, color:"#f59e0b" }}>🔱 Floor {floor}</span>
         <span style={{ fontSize:12, color:"#6b5e50" }}>Turn {turn}</span>
@@ -1020,19 +1020,19 @@ export default function AstraSTS() {
 
       </div>
 
-      {/* BATTLE LOG — last 4 lines, no scroll, newest brightest */}
-      <div style={{ flexShrink:0, padding:"4px 16px 4px", background:"rgba(0,0,0,.35)", borderTop:"1px solid rgba(255,255,255,.06)", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
-        {battleLog.slice(-4).map((msg, i, arr) => {
-          const isLatest = i === arr.length - 1;
-          const age = arr.length - 1 - i; // 0=newest
-          const colors = ["#f5e6c8","#a89070","#6b5e50","#4a4040"];
-          const sizes  = [13, 12, 11, 11];
+      {/* BATTLE LOG — fixed 3-line space, never grows, newest brightest */}
+      <div style={{ flexShrink:0, height:58, overflow:"hidden", padding:"4px 16px", display:"flex", flexDirection:"column", justifyContent:"flex-end",
+        background:"rgba(0,0,0,.35)", borderTop:"1px solid rgba(255,255,255,.06)", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
+        {battleLog.slice(-3).map((msg, i, arr) => {
+          const age = arr.length - 1 - i;
+          const colors = ["#f0e0c0","#8a7060","#504040"];
+          const sizes  = [13, 11, 11];
           return (
             <div key={i} style={{
               fontSize: sizes[age] || 11,
               color:    colors[age] || "#3a3030",
-              fontWeight: isLatest ? 600 : 400,
-              padding:"1px 0",
+              fontWeight: age === 0 ? 600 : 400,
+              lineHeight:"17px",
               whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
             }}>{msg}</div>
           );
