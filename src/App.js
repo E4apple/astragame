@@ -590,10 +590,27 @@ export default function AstraSTS() {
     return move;
   };
 
+  // ─── FULLSCREEN ───
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
   // ─── CSS ───
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; height: 100dvh; overflow: hidden; }
+    body { overflow: hidden; }
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #b4530955; border-radius: 2px; }
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
@@ -606,7 +623,7 @@ export default function AstraSTS() {
   `;
 
   const bg = {
-    width:"100%", minHeight:"100vh",
+    width:"100%", minHeight:"100dvh",
     background:"linear-gradient(170deg, #0a0612 0%, #1a0a2e 30%, #16213e 60%, #0d1117 100%)",
     fontFamily:"'Crimson Text', Georgia, serif",
     color:"#e8dcc8",
@@ -627,13 +644,31 @@ export default function AstraSTS() {
       radial-gradient(ellipse at 70% 80%, rgba(139,92,246,0.03) 0%, transparent 60%)`,
   };
 
+  // ─── FULLSCREEN BUTTON (shown on all screens) ───
+  const fsBtn = (
+    <button
+      onClick={toggleFullscreen}
+      style={{
+        position:"fixed", bottom:16, right:16, zIndex:9999,
+        width:36, height:36, borderRadius:"50%",
+        background:"rgba(0,0,0,.55)", border:"1px solid rgba(255,255,255,.2)",
+        color:"#fff", fontSize:16, cursor:"pointer",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        backdropFilter:"blur(4px)",
+      }}
+      title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+    >
+      {isFullscreen ? "✕" : "⛶"}
+    </button>
+  );
+
   // ─── TITLE SCREEN ───
   if (screen === "title") {
     return (
       <div style={screenBg("/assets/backgrounds/title_bg.jpg")}>
-        <style>{css}</style>
+        <style>{css}</style>{fsBtn}
         <div style={overlay}/>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"100vh", gap:16, position:"relative", zIndex:1,
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100dvh", gap:16, position:"relative", zIndex:1,
           background:"radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 70%, transparent 100%)", padding:"40px 20px" }}>
           <div style={{ fontSize:56, animation:"float 3s ease infinite" }}>🔱</div>
           <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:64, fontWeight:900, letterSpacing:14,
@@ -663,8 +698,8 @@ export default function AstraSTS() {
   if (screen === "death") {
     return (
       <div style={screenBg("/assets/backgrounds/battle_bg.jpg")}>
-        <style>{css}</style><div style={overlay}/>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"100vh", gap:20, zIndex:1, position:"relative" }}>
+        <style>{css}</style>{fsBtn}<div style={overlay}/>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100dvh", gap:20, zIndex:1, position:"relative" }}>
           <div style={{ fontSize:64 }}>💀</div>
           <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:36, color:"#fc8181", letterSpacing:6 }}>DEFEATED</h2>
           <p style={{ color:"#8a7a6a", fontSize:16 }}>Floor {floor} • {masterDeck.length} cards</p>
@@ -682,8 +717,8 @@ export default function AstraSTS() {
   if (screen === "victory") {
     return (
       <div style={screenBg("/assets/backgrounds/map_bg.jpg")}>
-        <style>{css}</style><div style={overlay}/>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"100vh", gap:20, zIndex:1, position:"relative" }}>
+        <style>{css}</style>{fsBtn}<div style={overlay}/>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100dvh", gap:20, zIndex:1, position:"relative" }}>
           <div style={{ fontSize:64, animation:"glow 2s ease infinite" }}>🏆</div>
           <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:36, color:"#fbbf24", letterSpacing:6 }}>VICTORY</h2>
           <p style={{ color:"#a89070", fontSize:16 }}>Ravana has been vanquished!</p>
@@ -735,9 +770,9 @@ export default function AstraSTS() {
 
     return (
       <div style={screenBg("/assets/backgrounds/map_bg.jpg")}>
-        <style>{css}</style>
+        <style>{css}</style>{fsBtn}
         <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.75)" }}/>
-        <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", height:"100vh" }}>
+        <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", height:"100dvh" }}>
 
           {/* Header */}
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
@@ -839,8 +874,8 @@ export default function AstraSTS() {
   if (screen === "rest") {
     return (
       <div style={screenBg("/assets/backgrounds/rest_bg.jpg")}>
-        <style>{css}</style><div style={overlay}/>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"100vh", gap:24, zIndex:1, position:"relative" }}>
+        <style>{css}</style>{fsBtn}<div style={overlay}/>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100dvh", gap:24, zIndex:1, position:"relative" }}>
           <div style={{ fontSize:56 }}>🏕️</div>
           <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:28, color:"#fbbf24", letterSpacing:4 }}>Rest Site</h2>
           <p style={{ color:"#8a7a6a", fontSize:15 }}>❤️ {playerHp}/{playerMaxHp}</p>
@@ -863,8 +898,8 @@ export default function AstraSTS() {
   if (screen === "reward") {
     return (
       <div style={screenBg("/assets/backgrounds/battle_bg.jpg")}>
-        <style>{css}</style><div style={overlay}/>
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:"100vh", gap:20, zIndex:1, position:"relative" }}>
+        <style>{css}</style>{fsBtn}<div style={overlay}/>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100dvh", gap:20, zIndex:1, position:"relative" }}>
           <h2 style={{ fontFamily:"'Cinzel',serif", fontSize:28, color:"#fbbf24", letterSpacing:4 }}>Victory!</h2>
           <p style={{ color:"#a89070" }}>💰 +{rewardGold} Gold</p>
           <p style={{ fontFamily:"'Cinzel',serif", fontSize:16, color:"#8a7a6a", letterSpacing:2, marginTop:8 }}>Choose a card to add to your deck:</p>
@@ -902,8 +937,8 @@ export default function AstraSTS() {
   const intent = getIntent();
 
   return (
-    <div style={{...screenBg("/assets/backgrounds/battle_bg.jpg"), display:"flex", flexDirection:"column", height:"100vh"}}>
-      <style>{css}</style>
+    <div style={{...screenBg("/assets/backgrounds/battle_bg.jpg"), display:"flex", flexDirection:"column", height:"100dvh"}}>
+      <style>{css}</style>{fsBtn}
       <div style={overlay}/>
 
       {/* TOP BAR */}
