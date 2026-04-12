@@ -119,7 +119,7 @@ export default function AstraSTS() {
   const [drawPile, setDrawPile] = useState([]);
   const [hand, setHand] = useState([]);
   const [discardPile, setDiscardPile] = useState([]);
-  const [exhaustPile, setExhaustPile] = useState([]);
+  const [, setExhaustPile] = useState([]);
   const [energy, setEnergy] = useState(3);
   const [maxEnergy] = useState(3);
   const [block, setBlock] = useState(0);
@@ -134,9 +134,8 @@ export default function AstraSTS() {
   const [rewardCards, setRewardCards] = useState([]);
   const [rewardGold, setRewardGold] = useState(0);
   const [enemyAnimState, setEnemyAnimState]   = useState("idle");
-  const [playerAnimState, setPlayerAnimState] = useState("idle");
-  const [enemyFlashKey, setEnemyFlashKey]     = useState(0);
-  const [playerFlashKey, setPlayerFlashKey]   = useState(0);
+  const [, setPlayerAnimState] = useState("idle");
+  const [, setPlayerFlashKey]  = useState(0);
   const [vfxKey, setVfxKey]                 = useState("strike");
   const [vfxTrigger, setVfxTrigger]         = useState(0);
   const logRef = useRef(null);
