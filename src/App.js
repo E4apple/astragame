@@ -592,12 +592,19 @@ export default function AstraSTS() {
 
   // ─── FULLSCREEN ───
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fsHint, setFsHint] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
   function toggleFullscreen() {
+    if (isIOS) {
+      setFsHint(true);
+      setTimeout(() => setFsHint(false), 3500);
+      return;
+    }
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     } else {
@@ -646,20 +653,33 @@ export default function AstraSTS() {
 
   // ─── FULLSCREEN BUTTON (shown on all screens) ───
   const fsBtn = (
-    <button
-      onClick={toggleFullscreen}
-      style={{
-        position:"fixed", bottom:16, right:16, zIndex:9999,
-        width:36, height:36, borderRadius:"50%",
-        background:"rgba(0,0,0,.55)", border:"1px solid rgba(255,255,255,.2)",
-        color:"#fff", fontSize:16, cursor:"pointer",
-        display:"flex", alignItems:"center", justifyContent:"center",
-        backdropFilter:"blur(4px)",
-      }}
-      title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-    >
-      {isFullscreen ? "✕" : "⛶"}
-    </button>
+    <>
+      <button
+        onClick={toggleFullscreen}
+        style={{
+          position:"fixed", bottom:20, right:16, zIndex:9999,
+          width:34, height:34, borderRadius:"50%",
+          background:"rgba(0,0,0,.6)", border:"1px solid rgba(255,255,255,.25)",
+          color:"#ccc", fontSize:15, cursor:"pointer",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          backdropFilter:"blur(4px)",
+        }}
+        title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? "↙" : "↗"}
+      </button>
+      {fsHint && (
+        <div style={{
+          position:"fixed", bottom:64, right:12, zIndex:9999,
+          background:"rgba(0,0,0,.85)", border:"1px solid rgba(255,255,255,.2)",
+          borderRadius:8, padding:"10px 14px", maxWidth:200,
+          fontSize:12, color:"#e8dcc8", lineHeight:1.5,
+          backdropFilter:"blur(8px)",
+        }}>
+          📱 Tap <strong>Share → Add to Home Screen</strong> to play fullscreen on iPhone
+        </div>
+      )}
+    </>
   );
 
   // ─── TITLE SCREEN ───
@@ -999,12 +1019,16 @@ export default function AstraSTS() {
 
       </div>
 
-      {/* BATTLE LOG */}
-      <div ref={logRef} style={{ flex:"1 1 auto", overflowY:"auto", padding:"8px 16px", minHeight:0 }}>
-        {battleLog.slice(-8).map((msg, i) => (
-          <div key={i} style={{ fontSize:14, padding:"4px 0", color: i === battleLog.slice(-8).length - 1 ? "#f5e6c8" : "#8a7a6a",
-            borderBottom:"1px solid rgba(255,255,255,.05)",
-            fontWeight: i === battleLog.slice(-8).length - 1 ? 600 : 400 }}>{msg}</div>
+      {/* BATTLE LOG — last 2 lines only, no scroll */}
+      <div style={{ flexShrink:0, padding:"4px 16px 2px", background:"rgba(0,0,0,.3)", borderTop:"1px solid rgba(255,255,255,.05)", borderBottom:"1px solid rgba(255,255,255,.05)" }}>
+        {battleLog.slice(-2).map((msg, i, arr) => (
+          <div key={i} style={{
+            fontSize: i === arr.length - 1 ? 13 : 11,
+            color:     i === arr.length - 1 ? "#f5e6c8" : "#6b5e50",
+            fontWeight:i === arr.length - 1 ? 600 : 400,
+            padding:"2px 0",
+            whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+          }}>{msg}</div>
         ))}
       </div>
 
