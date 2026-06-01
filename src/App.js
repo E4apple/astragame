@@ -35,7 +35,7 @@ const STARTER_DECK = [
 
 // ─── ENEMY DATABASE ───
 const ENEMIES = [
-  { id:"rakshasa", name:"Rakshasa", emoji:"👹", sprite:"flying_eye", maxHp:42, moveset:[
+  { id:"rakshasa", name:"Rakshasa", emoji:"👹", sprite:"rakshasa", maxHp:42, moveset:[
     { type:"attack", damage:8, intent:"⚔️", label:"8" },
     { type:"attack", damage:12, intent:"⚔️⚔️", label:"12" },
     { type:"defend", block:6, intent:"🛡️", label:"Block" },
