@@ -620,13 +620,42 @@ export default function AstraSTS() {
     body { overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #b4530955; border-radius: 2px; }
+
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
     @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-    @keyframes cardHover { 0%{box-shadow:0 0 0 transparent} 100%{box-shadow:0 0 20px rgba(245,158,11,.4)} }
     @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     @keyframes glow { 0%,100%{filter:drop-shadow(0 0 8px rgba(245,158,11,.3))} 50%{filter:drop-shadow(0 0 20px rgba(245,158,11,.6))} }
-    .card-hand:hover { transform: translateY(-12px) scale(1.05) !important; z-index:10 !important; }
+    @keyframes hpPulse { 0%,100%{box-shadow:0 0 6px rgba(220,38,38,.4)} 50%{box-shadow:0 0 14px rgba(220,38,38,.8)} }
+    @keyframes energyGlow { 0%,100%{box-shadow:0 0 8px rgba(245,158,11,.4),inset 0 0 8px rgba(245,158,11,.1)} 50%{box-shadow:0 0 20px rgba(245,158,11,.7),inset 0 0 12px rgba(245,158,11,.2)} }
+    @keyframes intentPulse { 0%,100%{opacity:.85} 50%{opacity:1} }
+
+    .card-hand:hover { transform: translateY(-14px) scale(1.06) !important; z-index:10 !important; }
+
+    /* Stone panel — reusable dark textured look */
+    .stone-panel {
+      background: linear-gradient(180deg, #1a1208 0%, #120e06 40%, #0e0b04 100%);
+      border-top: 1px solid rgba(180,140,60,.35);
+      border-bottom: 1px solid rgba(0,0,0,.8);
+      box-shadow: inset 0 1px 0 rgba(255,220,100,.08), inset 0 -1px 0 rgba(0,0,0,.5);
+    }
+    /* Gold divider line */
+    .gold-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(180,140,60,.5) 30%, rgba(220,180,80,.7) 50%, rgba(180,140,60,.5) 70%, transparent);
+    }
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 700;
+      border: 1px solid; letter-spacing: .3px;
+    }
+    /* Intent badge */
+    .intent-badge {
+      padding: 4px 14px; border-radius: 3px; font-size: 12px; font-weight: 600;
+      backdrop-filter: blur(6px); letter-spacing: .5px;
+      animation: intentPulse 2s ease infinite;
+    }
   `;
 
   const bg = {
@@ -962,16 +991,19 @@ export default function AstraSTS() {
       <div style={overlay}/>
 
       {/* TOP BAR */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 16px 6px",
-        paddingTop:"env(safe-area-inset-top, 6px)",
-        background:"rgba(0,0,0,.5)", borderBottom:"1px solid rgba(245,158,11,.15)", position:"relative", zIndex:2, flexShrink:0 }}>
-        <span style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, color:"#f59e0b" }}>🔱 Floor {floor}</span>
-        <span style={{ fontSize:12, color:"#6b5e50" }}>Turn {turn}</span>
+      <div className="stone-panel" style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+        padding:"6px 16px", paddingTop:"env(safe-area-inset-top, 6px)",
+        position:"relative", zIndex:2, flexShrink:0 }}>
+        <span style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:900, color:"#c9973a",
+          textShadow:"0 0 12px rgba(200,150,50,.4)", letterSpacing:1 }}>⚜ FLOOR {floor}</span>
+        <span style={{ fontFamily:"'Cinzel',serif", fontSize:11, color:"#6b5540", letterSpacing:2 }}>TURN {turn}</span>
         <div style={{ display:"flex", gap:6 }}>
           {potions.map((p,i) => (
             <button key={i} onClick={()=>drinkPotion(i)} title={p.desc} style={{
-              fontSize:18, background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.1)",
-              borderRadius:4, padding:"2px 6px", cursor:"pointer"
+              fontSize:17, background:"linear-gradient(135deg,#2a1a08,#1a0e04)",
+              border:"1px solid rgba(180,140,60,.4)", borderRadius:3,
+              padding:"2px 7px", cursor:"pointer", boxShadow:"0 0 8px rgba(180,140,60,.2)",
+              color:"#e8d5a0"
             }}>{p.emoji}</button>
           ))}
         </div>
@@ -993,10 +1025,15 @@ export default function AstraSTS() {
         {/* Intent — top center */}
         {intent && (
           <div style={{ position:"absolute", top:8, left:0, right:0, display:"flex", justifyContent:"center", zIndex:2 }}>
-            <div style={{ padding:"3px 12px", borderRadius:20, fontSize:12, backdropFilter:"blur(4px)",
-              background: intent.type==="attack"||intent.type==="multi" ? "rgba(239,68,68,.3)" : intent.type==="defend" ? "rgba(59,130,246,.3)" : "rgba(168,85,247,.3)",
-              border: `1px solid ${intent.type==="attack"||intent.type==="multi"?"rgba(239,68,68,.6)":intent.type==="defend"?"rgba(59,130,246,.6)":"rgba(168,85,247,.6)"}`,
+            <div className="intent-badge" style={{
+              background: intent.type==="attack"||intent.type==="multi"
+                ? "linear-gradient(135deg,rgba(120,20,20,.85),rgba(80,10,10,.9))"
+                : intent.type==="defend"
+                ? "linear-gradient(135deg,rgba(20,40,100,.85),rgba(10,25,70,.9))"
+                : "linear-gradient(135deg,rgba(80,20,120,.85),rgba(50,10,80,.9))",
+              border: `1px solid ${intent.type==="attack"||intent.type==="multi"?"rgba(220,60,60,.6)":intent.type==="defend"?"rgba(60,120,220,.6)":"rgba(150,60,220,.6)"}`,
               color: intent.type==="attack"||intent.type==="multi"?"#fca5a5":intent.type==="defend"?"#93c5fd":"#c4b5fd",
+              boxShadow: `0 2px 12px ${intent.type==="attack"||intent.type==="multi"?"rgba(220,38,38,.3)":intent.type==="defend"?"rgba(59,130,246,.3)":"rgba(168,85,247,.3)"}`,
             }}>
               {intent.intent} {intent.label}
             </div>
@@ -1005,69 +1042,105 @@ export default function AstraSTS() {
 
         {/* Name + HP + statuses — bottom overlay */}
         <div style={{ position:"absolute", bottom:0, left:0, right:0, zIndex:2,
-          background:"linear-gradient(transparent, rgba(0,0,0,0.75))", padding:"16px 12px 8px", textAlign:"center" }}>
-          <div style={{ fontFamily:"'Cinzel',serif", fontSize:16, fontWeight:700, textShadow:"0 2px 8px rgba(0,0,0,.9)", marginBottom:4 }}>{enemy?.name}</div>
-          <div style={{ width:160, height:8, background:"rgba(0,0,0,.6)", borderRadius:4, overflow:"hidden", margin:"0 auto 4px", border:"1px solid rgba(239,68,68,.3)" }}>
-            <div style={{ width:`${(enemyHp/enemyMaxHp)*100}%`, height:"100%", borderRadius:4, transition:"width .3s", background:"linear-gradient(90deg,#dc2626,#ef4444)" }}/>
+          background:"linear-gradient(transparent, rgba(5,2,0,.88) 60%)", padding:"20px 16px 10px", textAlign:"center" }}>
+          <div style={{ fontFamily:"'Cinzel',serif", fontSize:15, fontWeight:900, letterSpacing:2,
+            color:"#e8c882", textShadow:"0 0 16px rgba(200,150,50,.5), 0 2px 8px rgba(0,0,0,.9)", marginBottom:6 }}>{enemy?.name}</div>
+          {/* HP bar */}
+          <div style={{ width:180, height:7, background:"rgba(0,0,0,.7)", borderRadius:2, overflow:"hidden",
+            margin:"0 auto 6px", border:"1px solid rgba(140,30,30,.5)",
+            boxShadow:"0 0 8px rgba(180,20,20,.3), inset 0 1px 3px rgba(0,0,0,.8)", animation:"hpPulse 2s ease infinite" }}>
+            <div style={{ width:`${(enemyHp/enemyMaxHp)*100}%`, height:"100%", transition:"width .4s",
+              background:"linear-gradient(90deg,#7f1010,#c41a1a,#e03030)",
+              boxShadow:"2px 0 8px rgba(220,40,40,.6)" }}/>
           </div>
-          <div style={{ fontSize:12, display:"flex", justifyContent:"center", gap:10, fontWeight:600, textShadow:"0 1px 4px rgba(0,0,0,.9)" }}>
-            <span>❤️ {enemyHp}/{enemyMaxHp}</span>
-            {enemyBlock > 0 && <span style={{ color:"#93c5fd" }}>🛡️ {enemyBlock}</span>}
-            {enemyStr > 0 && <span style={{ color:"#fbbf24" }}>💪 {enemyStr}</span>}
-            {enemyPoison > 0 && <span style={{ color:"#86efac" }}>☠️ {enemyPoison}</span>}
+          {/* HP + statuses */}
+          <div style={{ display:"flex", justifyContent:"center", gap:6, flexWrap:"wrap" }}>
+            <span className="status-badge" style={{ color:"#fca5a5", borderColor:"rgba(220,60,60,.4)", background:"rgba(80,10,10,.6)" }}>
+              ♥ {enemyHp}/{enemyMaxHp}
+            </span>
+            {enemyBlock > 0 && <span className="status-badge" style={{ color:"#93c5fd", borderColor:"rgba(60,120,220,.4)", background:"rgba(10,20,70,.6)" }}>🛡 {enemyBlock}</span>}
+            {enemyStr > 0 && <span className="status-badge" style={{ color:"#fbbf24", borderColor:"rgba(200,150,20,.4)", background:"rgba(60,40,0,.6)" }}>↑ {enemyStr}</span>}
+            {enemyPoison > 0 && <span className="status-badge" style={{ color:"#86efac", borderColor:"rgba(40,160,80,.4)", background:"rgba(5,40,15,.6)" }}>☠ {enemyPoison}</span>}
           </div>
         </div>
 
       </div>
 
       {/* BATTLE LOG — fixed 3-line space, never grows, newest brightest */}
-      <div style={{ flexShrink:0, height:58, overflow:"hidden", padding:"4px 16px", display:"flex", flexDirection:"column", justifyContent:"flex-end",
-        background:"rgba(0,0,0,.35)", borderTop:"1px solid rgba(255,255,255,.06)", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
+      <div className="stone-panel" style={{ flexShrink:0, height:60, overflow:"hidden", padding:"4px 16px 5px",
+        display:"flex", flexDirection:"column", justifyContent:"flex-end", position:"relative", zIndex:2 }}>
+        <div style={{ position:"absolute", top:0, left:0, right:0 }} className="gold-line"/>
         {battleLog.slice(-3).map((msg, i, arr) => {
           const age = arr.length - 1 - i;
-          const colors = ["#f0e0c0","#8a7060","#504040"];
-          const sizes  = [13, 11, 11];
+          const colors = ["#e8d5a3","#6b5540","#352820"];
+          const sizes  = [12, 11, 10];
           return (
             <div key={i} style={{
-              fontSize: sizes[age] || 11,
-              color:    colors[age] || "#3a3030",
-              fontWeight: age === 0 ? 600 : 400,
-              lineHeight:"17px",
+              fontSize: sizes[age] || 10,
+              color:    colors[age] || "#2a1a10",
+              fontWeight: age === 0 ? 700 : 400,
+              lineHeight:"18px",
               whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+              fontFamily: age === 0 ? "'Crimson Text', serif" : "inherit",
+              letterSpacing: age === 0 ? ".2px" : "0",
             }}>{msg}</div>
           );
         })}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0 }} className="gold-line"/>
       </div>
 
       {/* PLAYER SECTION */}
-      <div style={{ flexShrink:0, position:"relative", zIndex:1 }}>
+      <div className="stone-panel" style={{ flexShrink:0, position:"relative", zIndex:1 }}>
         {/* Player status */}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 16px",
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"7px 14px",
           animation: shakePlayer ? "shake .35s ease" : "none" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-            <span style={{ fontSize:28 }}>🏹</span>
+
+          {/* Left: avatar + HP */}
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <div style={{ width:36, height:36, borderRadius:"50%", border:"2px solid rgba(180,140,60,.5)",
+              background:"radial-gradient(circle,#2a1a08,#120e04)",
+              display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>🏹</div>
             <div>
-              <div style={{ width:120, height:8, background:"rgba(0,0,0,.6)", borderRadius:4, overflow:"hidden", border:"1px solid rgba(239,68,68,.3)" }}>
-                <div style={{ width:`${(playerHp/playerMaxHp)*100}%`, height:"100%", background:"linear-gradient(90deg,#ef4444,#f87171)", borderRadius:4 }}/>
+              {/* HP bar */}
+              <div style={{ width:110, height:6, background:"rgba(0,0,0,.7)", borderRadius:2, overflow:"hidden",
+                border:"1px solid rgba(180,40,40,.4)", marginBottom:4,
+                boxShadow:"0 0 6px rgba(180,20,20,.2), inset 0 1px 2px rgba(0,0,0,.8)", animation:"hpPulse 2.5s ease infinite" }}>
+                <div style={{ width:`${(playerHp/playerMaxHp)*100}%`, height:"100%", transition:"width .4s",
+                  background:"linear-gradient(90deg,#7f1010,#c41a1a,#e03030)",
+                  boxShadow:"2px 0 6px rgba(220,40,40,.5)" }}/>
               </div>
-              <div style={{ fontSize:12, marginTop:3, display:"flex", gap:8, fontWeight:600, textShadow:"0 1px 4px rgba(0,0,0,.9)" }}>
-                <span>❤️ {playerHp}/{playerMaxHp}</span>
-                {block > 0 && <span style={{ color:"#93c5fd" }}>🛡️ {block}</span>}
-                {strength > 0 && <span style={{ color:"#fbbf24" }}>💪 {strength}</span>}
-                {playerPoison > 0 && <span style={{ color:"#86efac" }}>☠️ {playerPoison}</span>}
+              {/* HP + status badges */}
+              <div style={{ display:"flex", gap:4, flexWrap:"wrap", alignItems:"center" }}>
+                <span className="status-badge" style={{ color:"#fca5a5", borderColor:"rgba(220,60,60,.35)", background:"rgba(60,8,8,.6)", fontSize:10 }}>
+                  ♥ {playerHp}/{playerMaxHp}
+                </span>
+                {block > 0 && <span className="status-badge" style={{ color:"#93c5fd", borderColor:"rgba(60,120,220,.35)", background:"rgba(8,16,60,.6)", fontSize:10 }}>🛡 {block}</span>}
+                {strength > 0 && <span className="status-badge" style={{ color:"#fbbf24", borderColor:"rgba(200,150,20,.35)", background:"rgba(40,28,0,.6)", fontSize:10 }}>⚔ {strength}</span>}
+                {playerPoison > 0 && <span className="status-badge" style={{ color:"#86efac", borderColor:"rgba(40,160,80,.35)", background:"rgba(4,30,12,.6)", fontSize:10 }}>☠ {playerPoison}</span>}
               </div>
             </div>
           </div>
+
+          {/* Right: energy orb + piles */}
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            {/* Energy orb */}
-            <div style={{ width:44, height:44, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center",
-              background:"radial-gradient(circle, #f59e0b44, transparent)", border:"2px solid #f59e0b88",
-              fontFamily:"'Cinzel',serif", fontSize:20, fontWeight:900, color:"#fbbf24" }}>{energy}</div>
             {/* Piles */}
-            <div style={{ textAlign:"center", fontSize:12, color:"#d4b896", fontWeight:600, textShadow:"0 1px 4px rgba(0,0,0,.9)" }}>
-              <div>📚 {drawPile.length}</div>
-              <div>♻️ {discardPile.length}</div>
+            <div style={{ display:"flex", flexDirection:"column", gap:3, alignItems:"center" }}>
+              <div style={{ fontSize:10, color:"#8a6a40", fontWeight:700, letterSpacing:.5, fontFamily:"'Cinzel',serif" }}>
+                <span style={{ color:"#a0836a" }}>✦</span> {drawPile.length}
+              </div>
+              <div style={{ width:28, height:1, background:"rgba(180,140,60,.2)" }}/>
+              <div style={{ fontSize:10, color:"#6b5035", fontWeight:700, letterSpacing:.5, fontFamily:"'Cinzel',serif" }}>
+                <span style={{ color:"#7a5a40" }}>↻</span> {discardPile.length}
+              </div>
             </div>
+            {/* Energy orb */}
+            <div style={{ width:46, height:46, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center",
+              background:"radial-gradient(circle at 35% 35%, rgba(255,210,80,.15), rgba(180,120,20,.08), transparent 70%)",
+              border:"2px solid rgba(245,158,11,.6)",
+              fontFamily:"'Cinzel',serif", fontSize:22, fontWeight:900, color:"#fbbf24",
+              animation:"energyGlow 2s ease infinite",
+              textShadow:"0 0 12px rgba(245,158,11,.8)",
+              boxShadow:"0 0 16px rgba(245,158,11,.2), inset 0 1px 0 rgba(255,220,80,.12)" }}>{energy}</div>
           </div>
         </div>
 
@@ -1135,19 +1208,24 @@ export default function AstraSTS() {
         </div>
 
         {/* End Turn */}
-        <div style={{ padding:"6px 16px", paddingBottom:"max(14px, env(safe-area-inset-bottom, 14px))", display:"flex", justifyContent:"center" }}>
+        <div style={{ padding:"5px 16px", paddingBottom:"max(12px, env(safe-area-inset-bottom, 12px))", display:"flex", justifyContent:"center" }}>
           <button onClick={endTurn} disabled={enemyActing} style={{
-            padding:"10px 32px", fontFamily:"'Cinzel',serif", fontSize:14, fontWeight:700, letterSpacing:4,
-            background: enemyActing ? "rgba(80,80,80,.3)" : "linear-gradient(135deg,#92400e,#b45309)",
-            color: enemyActing ? "#555" : "#fef3c7",
-            border:`1px solid ${enemyActing ? "#444" : "#d97706"}`,
-            borderRadius:4, cursor: enemyActing ? "not-allowed" : "pointer", textTransform:"uppercase",
-            boxShadow: enemyActing ? "none" : "0 0 20px rgba(245,158,11,.15)",
+            padding:"9px 40px", fontFamily:"'Cinzel',serif", fontSize:13, fontWeight:900, letterSpacing:5,
+            background: enemyActing
+              ? "linear-gradient(135deg,#1a1208,#120e06)"
+              : "linear-gradient(135deg,#6b2d0a,#92400e,#b45309,#92400e,#6b2d0a)",
+            color: enemyActing ? "#3a2a1a" : "#fef3c7",
+            border: `1px solid ${enemyActing ? "rgba(80,60,30,.3)" : "rgba(215,145,20,.7)"}`,
+            borderRadius:2, cursor: enemyActing ? "not-allowed" : "pointer", textTransform:"uppercase",
+            boxShadow: enemyActing
+              ? "none"
+              : "0 0 20px rgba(245,158,11,.2), inset 0 1px 0 rgba(255,200,80,.15), inset 0 -1px 0 rgba(0,0,0,.4)",
             transition:"all .2s",
+            position:"relative", overflow:"hidden",
           }}
-          onMouseEnter={e=>{if(!enemyActing){e.target.style.boxShadow="0 0 30px rgba(245,158,11,.3)"}}}
-          onMouseLeave={e=>{e.target.style.boxShadow=enemyActing?"none":"0 0 20px rgba(245,158,11,.15)"}}
-          >End Turn</button>
+          onMouseEnter={e=>{if(!enemyActing){e.currentTarget.style.boxShadow="0 0 36px rgba(245,158,11,.35), inset 0 1px 0 rgba(255,200,80,.2)"; e.currentTarget.style.borderColor="rgba(245,185,40,.9)"}}}
+          onMouseLeave={e=>{e.currentTarget.style.boxShadow=enemyActing?"none":"0 0 20px rgba(245,158,11,.2), inset 0 1px 0 rgba(255,200,80,.15)"; e.currentTarget.style.borderColor=enemyActing?"rgba(80,60,30,.3)":"rgba(215,145,20,.7)"}}
+          >{enemyActing ? "— ENEMY TURN —" : "⚔ END TURN ⚔"}</button>
         </div>
       </div>
     </div>
